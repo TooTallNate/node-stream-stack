@@ -36,7 +36,7 @@ function StreamStack(stream) {
   //        child stream. If you DO attach a 'data' listener, then you are
   //        responsible for emitting 'data' events on this child stream, usually
   //        having first gone through some kind of filter based on what this
-  //        StreamStack actually implementing.
+  //        StreamStack is actually implementing.
   var origEmit = stream.emit;
   stream.emit = function() {
     var args = arguments;
@@ -83,11 +83,11 @@ StreamStack.prototype.pause = function() {
 StreamStack.prototype.resume = function() {
   this.stream.resume();
 }
-StreamStack.prototype.destroy = function() {
-  this.stream.destory();
+StreamStack.prototype.destroy = function(error) {
+  this.stream.destory(error);
 }
 
-// By default, the 'readable' and 'writeable' property lookups get proxied
+// By default, the 'readable' and 'writable' property lookups get proxied
 // to the parent stream. You can set the variables if needed, and to relinquish
 // control of the variable back upstream, set it to `undefined`.
 Object.defineProperty(StreamStack.prototype, "readable", {
@@ -102,15 +102,15 @@ Object.defineProperty(StreamStack.prototype, "readable", {
   },
   enumerable: true
 });
-Object.defineProperty(StreamStack.prototype, "writeable", {
+Object.defineProperty(StreamStack.prototype, "writable", {
   get: function() {
-    if (this._writeable != undefined) {
-      return this._writeable;
+    if (this._writable != undefined) {
+      return this._writable;
     }
-    return this.stream.writeable;
+    return this.stream.writable;
   },
   set: function(value) {
-    this._writeable = value;
+    this._writable = value;
   },
   enumerable: true
 });
