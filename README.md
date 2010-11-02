@@ -12,9 +12,11 @@ parent stream to the child stream), and proxies all functions calls upstream
 (from the child stream to the parent stream). 
 
 Keeping the `StreamStack` subclass' implementation independent of the parent
-`Stream` instance allows for the backend transport to be easily swaped out
-for flexibility and code reuse.
+`Stream` instance allows for the backend transport to be easily swapped out
+for flexibility and code re-use.
 
+The overall __*goal*__ of `StreamStack`s is to be able to use it with the holy
+grail of the `Stream` object: __*Stream#pipe(writable)*__.
 
 A Simple Example
 ----------------
@@ -37,10 +39,7 @@ Here's a simple, kinda silly example:
     var doubleStdout = new DoubleWrite(process.stdout);
     doubleStdout.write("this will be printed twice!\n");
 
-We've defined a `DoubleWrite` class. It accepts a writeable stream, and
+We've defined a `DoubleWrite` class. It accepts a writable stream, and
 whenever `write()` is called on the DoubleWrite instance, then in return
 `write()` get called _twice_ on the parent stream. In this example, our
-writeable stream, `process.stdout`, will get the string printed to it twice.
-
-
-
+writable stream, `process.stdout`, will get the string printed to it twice.
