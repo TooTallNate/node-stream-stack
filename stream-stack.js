@@ -75,7 +75,10 @@ StreamStack.prototype.write = function(buf, type) {
   this.stream.write(buf, type);
 }
 StreamStack.prototype.end = function(buf, type) {
-  this.stream.end(buf, type);
+  if (buf) {
+    this.write(buf, type);
+  }
+  this.stream.end();
 }
 StreamStack.prototype.pause = function() {
   this.stream.pause();
