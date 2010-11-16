@@ -72,22 +72,22 @@ exports.StreamStack = StreamStack;
 //   passed data goes through some kind of filter before being passed to
 //   the parent stream.
 StreamStack.prototype.write = function(buf, type) {
-  this.stream.write(buf, type);
+  return this.stream.write(buf, type);
 }
 StreamStack.prototype.end = function(buf, type) {
   if (buf) {
     this.write(buf, type);
   }
-  this.stream.end();
+  return this.stream.end();
 }
 StreamStack.prototype.pause = function() {
-  this.stream.pause();
+  return this.stream.pause();
 }
 StreamStack.prototype.resume = function() {
-  this.stream.resume();
+  return this.stream.resume();
 }
 StreamStack.prototype.destroy = function(error) {
-  this.stream.destory(error);
+  return this.stream.destory(error);
 }
 
 // By default, the 'readable' and 'writable' property lookups get proxied
@@ -118,6 +118,20 @@ Object.defineProperty(StreamStack.prototype, "writable", {
   enumerable: true
 });
 
+// Walks up the 'stream' properties until it finds and returns the top-most
+// stream. i.e. it gets the low-level stream this stack is based on.
+Object.defineProperty(StreamStack.prototype, "topStream", {
+  get: function() {
+    var rtn = this.stream;
+    while (rtn.stream) {
+      rtn = rtn.stream;
+    }
+    return rtn;
+  },
+  enumerable: true
+});
+
+
 // Stupid workaround. Attach a listener for the given 'eventName'.
 // The callback returns and does nothing if there are no other
 // listeners attached for that event, otherwise it proxies the event
@@ -132,4 +146,3 @@ function proxyEvent(eventName, stream, streamStack) {
   }
   stream.on(eventName, callback);
 }
-
