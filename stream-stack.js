@@ -15,52 +15,53 @@ var Stream = require('stream').Stream;
  *     - GzipDecoderStack                     <- Decoding Layer
  *     - `.pipe()` into a 'fs.WriteStream'    <- Save to a File
  */
-function StreamStack(stream) {
+function StreamStack(stream, events) {
   if (!(stream instanceof Stream)) {
     throw new Error("StreamStack expects an instance of 'Stream' as an argument!");
   }
   if (!(this instanceof StreamStack)) {
-    return new StreamStack(stream);
+    return new StreamStack(stream, events);
   }
 
-  var self = this;
-  Stream.call(self);
+  Stream.call(this);
+
+  // If this is the first time the parent stream has been used in a
+  // StreamStack, then a StackEmitter will need to be injected into the stream.
+  if (!stream.__stackEmitter) {
+    StackEmitter.call(stream);
+  }
+  stream._stacks.push(this);
+  
+  // A reference to the parent stream for event handlers, etc.
   this.stream = stream;
 
-  // Monkey-patch the parent stream's 'emit' function, to proxy any
-  // events from the parent stream, and emit them downstream instance,
-  // IFF there aren't any listeners on the parent stream for
-  // that event already.
-  //   I.E. If you DON'T attach a 'data' listener in your StreamStack subclass'
-  //        constructor, then the event will be proxied, untouched, to the
-  //        child stream. If you DO attach a 'data' listener, then you are
-  //        responsible for emitting 'data' events on this child stream, usually
-  //        having first gone through some kind of filter based on what this
-  //        StreamStack is actually implementing.
-  var origEmit = stream.emit;
-  stream.emit = function() {
-    var args = arguments;
-    if (origEmit.apply(stream, args)) {
-      return true;
-    } else {
-      return self.emit.apply(self, args);
+  // TODO: Remove, if I can find a good reason to.
+  events = events || {};
+  if (!('data' in events))
+    events.data = proxyEvent('data');
+  if (!('end' in events))
+    events.end = proxyEvent('end');
+  if (!('error' in events))
+    events.error = proxyEvent('error');
+  if (!('close' in events))
+    events.close = proxyEvent('close');
+  if (!('fd' in events))
+    events.fd = proxyEvent('fd');
+  if (!('drain' in events))
+    events.drain = proxyEvent('drain');
+  
+  // If the StreamStack instance intends on intercepting events emitted from
+  // the parent stream, then the handlers need to be passed as a second 'events'
+  // object in the constructor. It takes care of attaching them to the parent
+  // stream. Handlers are invoked in 'this' StreamStack instance.
+  if (events) {
+    this._stackEvents = {};
+    for (var ev in events) {
+      this._stackEvents[ev] = events[ev].bind(this);
+      stream.on(ev, this._stackEvents[ev]);
     }
   }
-
-  // Attach a listener for the defined standard ReadStream and WriteStream
-  // events that get emitted. The handler that gets attached manually counts
-  // the number of attached listeners for the given event, and proxies the
-  // event to the child stream, so long as there's no other listeners attached.
-  //   Ideally this wouldn't be necessay, but Node has some internal
-  //   optimizations that prevent events from being emitted if there aren't
-  //   any listeners attached for that event.
-  proxyEvent('data',  stream, this);
-  proxyEvent('end',   stream, this);
-  proxyEvent('error', stream, this);
-  proxyEvent('close', stream, this);
-  proxyEvent('fd',    stream, this);
-  proxyEvent('drain', stream, this);
-
+  
 }
 require('util').inherits(StreamStack, Stream);
 exports.StreamStack = StreamStack;
@@ -131,18 +132,47 @@ Object.defineProperty(StreamStack.prototype, "topStream", {
   enumerable: true
 });
 
-
 // Stupid workaround. Attach a listener for the given 'eventName'.
-// The callback returns and does nothing if there are no other
-// listeners attached for that event, otherwise it proxies the event
-// downstream to the child StreamStack.
-function proxyEvent(eventName, stream, streamStack) {
-  var callback = function() {
-    var listeners = stream._events[eventName];
-    if (Array.isArray(listeners) && listeners.length > 1) return;
-    var args = Array.prototype.slice.call(arguments);
-    args.unshift(eventName);
-    streamStack.emit.apply(streamStack, args);
+// The callback simply re-emits the events and all arguments on 'this'.
+function proxyEvent(eventName) {
+  return function() {
+    var args = [eventName];
+    args = args.concat(args.slice.call(arguments));
+    this.emit.apply(this, args);
   }
-  stream.on(eventName, callback);
+}
+
+
+// Parent streams need to have StackEmitter called on them the first time a
+// StreamStack instance is attempting to use it. The __proto__ of the parent
+// stream will be injected with StackEmitter's prototype, to benefit from
+// the overwritten 'emit()' function.
+function StackEmitter() {
+  for (var prop in StackEmitter.prototype) {
+    this[prop] = StackEmitter.prototype[prop];
+  }
+  // The Array that holds the active StreamStack instances on a parent Stream.
+  this._stacks = [];
+}
+
+// A flag to indicate that the parent stream has already been injected.
+StackEmitter.prototype._stackEmitter = true;
+
+// The custom 'emit()' function is responsible for iterating through the list
+// of active StreamStack instances, and IFF the StreamStack instance didn't
+// pass a handler to the current event, it should re-emit on the child as well.
+StackEmitter.prototype.emit = function(eventName) {
+  var stack;
+  // Emit on the parent Stream first
+  var rtn = this.__proto__.emit.apply(this, arguments);
+  // Next re-emit on all the active StreamStack instances (if any)
+  for (var i=0, l=this._stacks.length; i<l; i++) {
+    stack = this._stacks[i];
+    if (!stack._stackEvents || !(eventName in stack._stackEvents)) {
+      if (!stack.emit.apply(stack, arguments)) {
+        rtn = false;
+      }
+    }
+  }
+  return rtn;
 }
