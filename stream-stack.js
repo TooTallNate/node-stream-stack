@@ -91,6 +91,26 @@ StreamStack.prototype.destroy = function(error) {
   return this.stream.destory(error);
 }
 
+// The 'cleanup()' function should be called after a StreamStack instance is
+// finished doing it's "thing", to cleanly allow another new StreamStack
+// instance to be attached to the parent Stream.
+StreamStack.prototype.cleanup = function() {
+  // Remove 'this' from the parent Stream's '_stacks' Array
+  var index = this.stream._stacks.indexOf(this);
+  process.assert(index >= 0);
+  this.stream._stacks.splice(index, 1);
+  // Set 'this.stream' to null.
+  // If any events were binded through the constructor, they get unbinded here
+  if (this._stackEvents) {
+    for (var ev in this._stackEvents) {
+      this.stream.removeListener(ev, this._stackEvents[ev]);
+    }
+    this._stackEvents = null;
+  }
+  // TODO: Maybe 'delete' instead? Is there any benefit?
+  this.stream = null;
+}
+
 // By default, the 'readable' and 'writable' property lookups get proxied
 // to the parent stream. You can set the variables if needed, and to relinquish
 // control of the variable back upstream, set it to `undefined`.
