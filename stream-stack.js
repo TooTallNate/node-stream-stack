@@ -27,7 +27,7 @@ function StreamStack(stream, events) {
 
   // If this is the first time the parent stream has been used in a
   // StreamStack, then a StackEmitter will need to be injected into the stream.
-  if (!stream.__stackEmitter) {
+  if (!stream._stackEmitter) {
     StackEmitter.call(stream);
   }
   stream._stacks.push(this);
