@@ -168,11 +168,15 @@ function proxyEvent(eventName) {
 // stream will be injected with StackEmitter's prototype, to benefit from
 // the overwritten 'emit()' function.
 function StackEmitter() {
+  // The Array that holds the active StreamStack instances on a parent Stream.
+  this._stacks = [];
+  // Get a reference to the original 'emit' function, since we're about to
+  // monkey-patch with our own 'emit' function.
+  this._origEmit = this.emit;
+  // Mix-in the rest of the StackEmitter properties.
   for (var prop in StackEmitter.prototype) {
     this[prop] = StackEmitter.prototype[prop];
   }
-  // The Array that holds the active StreamStack instances on a parent Stream.
-  this._stacks = [];
 }
 
 // A flag to indicate that the parent stream has already been injected.
@@ -184,7 +188,7 @@ StackEmitter.prototype._stackEmitter = true;
 StackEmitter.prototype.emit = function(eventName) {
   var stack;
   // Emit on the parent Stream first
-  var rtn = this.__proto__.emit.apply(this, arguments);
+  var rtn = this._origEmit.apply(this, arguments);
   // Next re-emit on all the active StreamStack instances (if any)
   for (var i=0, l=this._stacks.length; i<l; i++) {
     stack = this._stacks[i];
