@@ -1,11 +1,14 @@
 {
   "name": "stream-stack",
   "description": "Filter low-level `Stream` instances into stackable, protocol-based streams.",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": "Nathan Rajlich <nathan@tootallnate.net>",
   "keywords": ["stream", "stack", "protocol", "filter"],
   "devDependencies" : { "expresso": "*" },
   "main": "./stream-stack",
+  "modules": {
+    "util": "./util",
+  },
   "scripts" : { "test" : "expresso" },
   "engines": { "node": ">= 0.3.0" }
 }
