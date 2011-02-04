@@ -97,7 +97,6 @@ StreamStack.prototype.destroy = function(error) {
 StreamStack.prototype.cleanup = function() {
   // Remove 'this' from the parent Stream's '_stacks' Array
   var index = this.stream._stacks.indexOf(this);
-  process.assert(index >= 0);
   this.stream._stacks.splice(index, 1);
   // Set 'this.stream' to null.
   // If any events were binded through the constructor, they get unbinded here
