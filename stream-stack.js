@@ -82,10 +82,18 @@ StreamStack.prototype.end = function(buf, type) {
   return this.stream.end();
 }
 StreamStack.prototype.pause = function() {
-  return this.stream.pause();
+  if (this.stream.pause) {
+    return this.stream.pause();
+  } else {
+    return this.stream.emit('pause');
+  }
 }
 StreamStack.prototype.resume = function() {
-  return this.stream.resume();
+  if (this.stream.resume) {
+    return this.stream.resume();
+  } else {
+    return this.stream.emit('resume');
+  }
 }
 StreamStack.prototype.destroy = function(error) {
   return this.stream.destory(error);
