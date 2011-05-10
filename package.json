@@ -1,7 +1,7 @@
 {
   "name": "stream-stack",
   "description": "Filter low-level `Stream` instances into stackable, protocol-based streams.",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "Nathan Rajlich <nathan@tootallnate.net>",
   "keywords": [
     "stream",
@@ -25,5 +25,6 @@
   "directories": {},
   "files": [
     ""
-  ]
+  ],
+  "dependencies": {}
 }
