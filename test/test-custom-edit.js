@@ -1,6 +1,6 @@
 var assert = require('assert');
 var Stream = require('stream').Stream;
-var StreamStack = require('stream-stack').StreamStack;
+var StreamStack = require('../').StreamStack;
 
 // Calling `new StreamStack(stream)` on a Stream with a direct property 'emit'
 // needs to be accounted for, since the StreamStack constructor monkey-patches

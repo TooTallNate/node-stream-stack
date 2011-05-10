@@ -1,6 +1,6 @@
 var assert = require('assert');
 var Stream = require('stream').Stream;
-var StreamStack = require('stream-stack').StreamStack;
+var StreamStack = require('../').StreamStack;
 
 exports['check-both-parent-and-streamstack-get-data-event'] = function() {
   var stream = new Stream();

@@ -1,6 +1,6 @@
 var assert = require('assert');
 var Stream = require('stream').Stream;
-var StreamStack = require('stream-stack').StreamStack;
+var StreamStack = require('../').StreamStack;
 
 exports['topStream-property'] = function() {
   var stream = new Stream();
