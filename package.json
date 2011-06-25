@@ -13,9 +13,6 @@
     "expresso": "*"
   },
   "main": "./stream-stack",
-  "modules": {
-    "util": "./util"
-  },
   "scripts": {
     "test": "expresso"
   },
@@ -23,8 +20,5 @@
     "node": ">= 0.3.0"
   },
   "directories": {},
-  "files": [
-    ""
-  ],
   "dependencies": {}
 }
