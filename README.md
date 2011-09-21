@@ -28,21 +28,28 @@ A Simple Example
 
 Here's a simple, kinda silly example:
 
-    function DoubleWrite(stream) {
-      StreamStack.call(this, stream);
-    }
-    util.inherits(DoubleWrite, StreamStack);
+``` js
+var util = require('util');
+var StreamStack = require('stream-stack').StreamStack;
 
-    // Overwrite the default `write()` function
-    DoubleWrite.prototype.write = function(data) {
-      this.stream.write(data);
-      this.stream.write(data);
-    }
+// The first argument is the parent stream
+function DoubleWrite(stream) {
+  StreamStack.call(this, stream);
+}
+util.inherits(DoubleWrite, StreamStack);
+
+// Overwrite the default `write()` function to call
+// write() on the parent stream twice!
+DoubleWrite.prototype.write = function(data) {
+  this.stream.write(data);
+  this.stream.write(data);
+}
 
 
-    // How to Use:
-    var doubleStdout = new DoubleWrite(process.stdout);
-    doubleStdout.write("this will be printed twice!\n");
+// How to Use:
+var doubleStdout = new DoubleWrite(process.stdout);
+doubleStdout.write("this will be printed twice!\n");
+```
 
 We've defined a `DoubleWrite` class. It accepts a writable stream, and
 whenever `write()` is called on the DoubleWrite instance, then in return
