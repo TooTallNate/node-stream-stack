@@ -48,3 +48,11 @@ We've defined a `DoubleWrite` class. It accepts a writable stream, and
 whenever `write()` is called on the DoubleWrite instance, then in return
 `write()` get called _twice_ on the parent stream. In this example, our
 writable stream, `process.stdout`, will get the string printed to it twice.
+
+
+Known Subclasses
+----------------
+
+Check out the [Wiki][] page to see the list of [Known Subclasses][].
+
+[Wiki]: https://github.com/TooTallNate/node-stream-stack/wiki
