@@ -60,6 +60,6 @@ writable stream, `process.stdout`, will get the string printed to it twice.
 Known Subclasses
 ----------------
 
-Check out the [Wiki][] page to see the list of [Known Subclasses][].
+Check out the [Wiki][] page to see the list of [Known Subclasses][Wiki].
 
 [Wiki]: https://github.com/TooTallNate/node-stream-stack/wiki
