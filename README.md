@@ -19,8 +19,8 @@ test cases.
 
 Since `StreamStack` inherits from the regular node `Stream`, all it's prototypal
 goodies can be used along with your subclass instances. This makes it extremely
-easy for you to `Stream#pipe(writable)` to utilize node's data transfer
-philosophies.
+easy for you to call `Stream#pipe(writable)`, in order to utilize node's data
+transfer philosophies.
 
 
 A Simple Example
