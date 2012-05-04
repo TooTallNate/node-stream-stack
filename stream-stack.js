@@ -96,7 +96,7 @@ StreamStack.prototype.resume = function() {
   }
 }
 StreamStack.prototype.destroy = function(error) {
-  return this.stream.destory(error);
+  return this.stream.destroy(error);
 }
 
 // The 'cleanup()' function should be called after a StreamStack instance is
